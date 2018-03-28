@@ -71,7 +71,7 @@ class HighlightView {
 
     private ModifyMode modifyMode = ModifyMode.None;
     private HandleMode handleMode = HandleMode.Changing;
-    private boolean maintainAspectRatio;
+    private boolean maintainAspectRatio;// true ： 自由缩放
     private float initialAspectRatio;
     private float handleRadius;
     private float outlineWidth;
@@ -281,7 +281,7 @@ class HighlightView {
             // Convert to image space before sending to growBy()
             float xDelta = dx * (cropRect.width() / r.width());
             float yDelta = dy * (cropRect.height() / r.height());
-            growBy((((edge & GROW_LEFT_EDGE) != 0) ? -1 : 1) * xDelta,
+            growBy(edge, (((edge & GROW_LEFT_EDGE) != 0) ? -1 : 1) * xDelta,
                     (((edge & GROW_TOP_EDGE) != 0) ? -1 : 1) * yDelta);
         }
     }
@@ -308,7 +308,7 @@ class HighlightView {
     }
 
     // Grows the cropping rectangle by (dx, dy) in image space.
-    void growBy(float dx, float dy) {
+    void growBy(int edge, float dx, float dy) {
         if (maintainAspectRatio) {
             if (dx != 0) {
                 dy = dx / initialAspectRatio;
@@ -334,7 +334,22 @@ class HighlightView {
             }
         }
 
-        r.inset(-dx, -dy);
+        if((edge & GROW_LEFT_EDGE ) != 0)
+        {
+            r.left -= dx;
+        }
+        if((edge & GROW_RIGHT_EDGE ) != 0)
+        {
+            r.right += dx;
+        }
+        if((edge & GROW_TOP_EDGE ) != 0)
+        {
+            r.top -= dy;
+        }
+        if((edge & GROW_BOTTOM_EDGE ) != 0)
+        {
+            r.bottom += dy;
+        }
 
         // Don't let the cropping rectangle shrink too fast
         final float widthCap = 25F;
